@@ -81,7 +81,16 @@ fi
 # Make a password to *kind* of authenticate transfers.
 transfer_pass="$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM"
 transfer_pass="${transfer_pass:1:9}"
-printf "Your transfer ID: %s\n   and password: %s\n\nPlease enter this at receiver.\n\nRemember you must be on the same node.\n[Ctrl-C to cancel.]\n" "$fifo_suffix" "$transfer_pass"
+printf "
+Your transfer ID: %s
+    and password: %s
+
+Please enter this at receiver.
+
+Remember you must be on the same node.
+
+    [Ctrl-C to cancel.]
+" "$fifo_suffix" "$transfer_pass"
 
 
 # TODO: use openssl to use password to encrypt sample data, to make this actually secure at all.
