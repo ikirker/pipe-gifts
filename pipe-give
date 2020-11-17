@@ -33,7 +33,7 @@ function callstack() {
     local i
     # These arrays start at index 0, but 0 is this callstack function, so skip it.
     for ((i=1; i<${#FUNCNAME[*]}; i++)) do
-        if [ $i -ne 1 ]; then
+        if [[ $i -ne 1 ]]; then
             echo -n "  "  
         fi
         echo "${BASH_SOURCE[$i]}: in \"${FUNCNAME[$i]}\" called from line ${BASH_LINENO[$i]}"
