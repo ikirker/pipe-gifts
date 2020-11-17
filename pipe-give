@@ -1,0 +1,119 @@
+#!/bin/bash
+
+trap callstack ERR
+
+set -o errexit \
+    -o pipefail \
+    -o nounset
+
+function msg() {
+    if [[ "$#" -ne 2 ]]; then
+        printf "[%s] %s: (%s) %s" "$(logdate)" "$0" "fatal" "incorrect number of arguments provided to msg function"
+        exit 1
+    fi
+
+    local level="$1"
+    local message="$2"
+    local active_level="${global_msg_level:-none}"
+
+    local -A levels=([none]=0 [fatal]=1 [error]=2 [warn]=3 [info]=4 [debug]=5)
+    local num_level="${levels[$level]}"
+    local num_active_level="${levels[$active_level]}"
+
+    if [[ "$num_level" -le "${num_active_level}" ]]; then
+        printf "[%s] %s: (%s) %s\n" "$(logdate)" "$0" "$level" "$message" >&2
+    fi
+    if [[ "$level" == "fatal" ]]; then
+        callstack
+    fi
+}
+
+function callstack() {
+    echo --- Trace: ---
+    local i
+    # These arrays start at index 0, but 0 is this callstack function, so skip it.
+    for ((i=1; i<${#FUNCNAME[*]}; i++)) do
+        if [ $i -ne 1 ]; then
+            echo -n "  "  
+        fi
+        echo "${BASH_SOURCE[$i]}: in \"${FUNCNAME[$i]}\" called from line ${BASH_LINENO[$i]}"
+    done
+    echo --------------
+    exit 1
+}
+
+function cleanup_dir() {
+    if [[ -d "$fifo_dir" ]]; then
+        rm -rf -- "${fifo_dir}"
+    fi
+}
+
+# TODO: improve
+if [[ "$#" -eq 0 ]] || [[ "$1" == "-h" ]]; then
+    echo "Usage: $0 [files]" >&2
+    exit 0
+fi
+
+# Allow use of alternative temporary directories, but...
+tmpdir="${TMPDIR:-/tmp}"
+
+# ... check the TMPDIR has the permissions we need.
+tmpdir_perms="$(stat --printf=%a -- "$tmpdir")"
+
+if [[ "$tmpdir_perms" != "1777" ]]; then
+    msg fatal "cannot use TMPDIR to transfer data, does not have appropriate permissions"
+fi
+
+fifo_dir="$(mktemp -d -p "$tmpdir" -t "pipe-transfer.XXXXXXXX")"
+fifo_suffix="${fifo_dir##*.}"
+
+# If we get interrupted or finish, remove the fifo directory
+trap cleanup_dir EXIT
+
+# Make one for password and info, one for transferring data.
+# It's like we're reinventing ftp woo
+mkfifo -- "$fifo_dir/ctrl" "$fifo_dir/data"
+
+if [[ "${RANDOM:-}" == "" ]]; then
+    msg fatal "bash random number generator has been broken, cannot continue"
+fi
+
+# Make a password to *kind* of authenticate transfers.
+transfer_pass="$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM"
+transfer_pass="${transfer_pass:1:9}"
+printf "Your transfer ID: %s\n   and password: %s\n\nPlease enter this at receiver.\n\nRemember you must be on the same node.\n[Ctrl-C to cancel.]\n" "$fifo_suffix" "$transfer_pass"
+
+
+# TODO: use openssl to use password to encrypt sample data, to make this actually secure at all.
+
+# Allow several tries.
+allow_tries=3
+tries=0
+correct_pass=0
+
+while [[ "$tries" -lt "$allow_tries" ]]; do
+    pass_recv="$(cat -- "$fifo_dir/ctrl")"
+
+    if [[ "$pass_recv" == "$transfer_pass" ]]; then
+        correct_pass=1
+        break
+    else
+        msg info "received incorrect transfer password! $(( allow_tries - tries )) tries remaining."
+        echo "incorrect password" >"$fifo_dir/ctrl"
+        tries="$(( tries + 1 ))"
+        continue
+    fi
+done
+
+if [[ "$correct_pass" == 0 ]]; then
+    msg fatal "maximum number of password attempts exceeded, quitting."
+    # Juuuuuust in case msg fatal doesn't exit, for some reason.
+    exit 5
+fi
+
+# So by this point, we have a correct password, in theory.
+echo "correct password" >"$fifo_dir/ctrl"
+
+tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
+
+msg info "complete."
