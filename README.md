@@ -30,7 +30,8 @@ Sender:
 
 ```
 # Make a junk 1GiB file
-$ dd if=/dev/zero of=some_file bs=1024MiB count=1
+$ dd if=/dev/zero of=some_file bs=1GiB count=1
+
 $ pipe-give some_file
 
 Your transfer ID: YMUdkcTB
