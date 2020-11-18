@@ -47,7 +47,7 @@ Remember you must be on the same node.
 
 Receiver:
 ```
-$ $ ./pipe-receive
+$ ./pipe-receive
 Please enter your transfer ID: YMUdkcTB
 Please enter transfer password: 715910185
 ```
