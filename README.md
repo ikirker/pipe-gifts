@@ -32,13 +32,16 @@ Sender:
 # Make a junk 1GiB file
 $ dd if=/dev/zero of=some_file bs=1024MiB count=1
 $ pipe-give some_file
-Your transfer ID: qBMqUIOt
-   and password: 704122286
+
+Your transfer ID: YMUdkcTB
+    and password: 715910185
 
 Please enter this at receiver.
 
 Remember you must be on the same node.
-[Ctrl-C to cancel.]
+
+    [Ctrl-C to cancel.]
+
 ```
 
 Receiver:
