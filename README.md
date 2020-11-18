@@ -48,8 +48,8 @@ Remember you must be on the same node.
 Receiver:
 ```
 $ $ ./pipe-receive
-Please enter your transfer ID: qBMqUIOt
-Please enter transfer password: 704122286
+Please enter your transfer ID: YMUdkcTB
+Please enter transfer password: 715910185
 ```
 
 Sender (`tar v` output):
