@@ -7,10 +7,11 @@ set -o errexit \
     -o nounset
 
 global_msg_level=info
+prog_name="${0##*/}"
 
 function msg() {
     if [[ "$#" -ne 2 ]]; then
-        printf "[%s] %s: (%s) %s" "$(logdate)" "$0" "fatal" "incorrect number of arguments provided to msg function"
+        printf "[%s] %s: (%s) %s" "$(logdate)" "$prog_name" "fatal" "incorrect number of arguments provided to msg function"
         exit 1
     fi
 
@@ -23,7 +24,7 @@ function msg() {
     local num_active_level="${levels[$active_level]}"
 
     if [[ "$num_level" -le "${num_active_level}" ]]; then
-        printf "[%s] %s: (%s) %s\n" "$(logdate)" "$0" "$level" "$message" >&2
+        printf "[%s] %s: (%s) %s\n" "$(logdate)" "$prog_name" "$level" "$message" >&2
     fi
     if [[ "$level" == "fatal" ]]; then
         if [[ "${debug_mode:-false}" == "true" ]]; then
@@ -71,7 +72,7 @@ must_have_cmds tar mkfifo mktemp stat date chmod /usr/bin/getopt
 # Arg Parsing -- not a lot
 
 help_message="
-usage: $0 [-h|-d] <file>...
+usage: $prog_name [-h|-d] <file>...
 
 A script to quickly transfer files to another user on the same node.
 
@@ -89,10 +90,10 @@ Args:
    <file>...         One or more files to transfer.
 
 Examples:
-   $0 my_file        Set up a transfer for a file called \"my_file\".
-   $0 f_1 f_2        Set up a single transfer for two files, \"f_1\" and \"f_2\".
+   $prog_name my_file        Set up a transfer for a file called \"my_file\".
+   $prog_name f_1 f_2        Set up a single transfer for two files, \"f_1\" and \"f_2\".
 
-   $0 my_dir         Set up a transfer for a directory called \"my_dir\".
+   $prog_name my_dir         Set up a transfer for a directory called \"my_dir\".
 "
 
 function show_help_and_exit() {
@@ -208,7 +209,7 @@ while [[ "$tries" -lt "$allow_tries" ]]; do
             exit 5
         fi
 
-        msg info "received incorrect transfer password! $(( allow_tries - tries )) tries remaining."
+        msg warn "received incorrect transfer password! $(( allow_tries - tries )) tries remaining."
         echo "incorrect password" >"$fifo_dir/ctrl"
         continue
     fi
