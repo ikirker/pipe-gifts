@@ -6,7 +6,7 @@ set -o errexit \
     -o pipefail \
     -o nounset
 
-global_msg_level=4
+global_msg_level=info
 
 function msg() {
     if [[ "$#" -ne 2 ]]; then
