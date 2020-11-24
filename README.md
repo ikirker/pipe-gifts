@@ -15,6 +15,7 @@ The users have to be logged into the same node at the same time, and since the p
  - better credential-handling mechanism (use `openssl enc` to encrypt known data with the password?)
  - checksums?
  - option to specify ID and password on the receiving command-line?
+ - some kind of diceware-style algorithm to make the IDs and passwords easier to tell someone?
 
 ## Potential Problems:
 
