@@ -200,18 +200,23 @@ while [[ "$tries" -lt "$allow_tries" ]]; do
         correct_pass=1
         break
     else
+        tries="$(( tries + 1 ))"
+        if [[ "$(( allow_tries - tries ))" -eq 0 ]]; then
+            echo "too many tries" >"$fifo_dir/ctrl"
+            msg fatal "maximum number of password attempts exceeded, quitting."
+            # Juuuuuust in case msg fatal doesn't exit, for some reason.
+            exit 5
+        fi
+
         msg info "received incorrect transfer password! $(( allow_tries - tries )) tries remaining."
         echo "incorrect password" >"$fifo_dir/ctrl"
-        tries="$(( tries + 1 ))"
         continue
     fi
 done
 
 if [[ "$correct_pass" == 0 ]]; then
-    echo "too many tries" >"$fifo_dir/ctrl"
-    msg fatal "maximum number of password attempts exceeded, quitting."
-    # Juuuuuust in case msg fatal doesn't exit, for some reason.
-    exit 5
+    # Safety rail just in case of a logic failure.
+    exit 6
 fi
 
 # So by this point, we have a correct password, in theory.
