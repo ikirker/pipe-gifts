@@ -74,9 +74,9 @@ must_have_cmds tar mkfifo mktemp stat date chmod /usr/bin/getopt
 help_message="
 usage: $prog_name [-h|-d] <file>...
 
-A script to quickly transfer files to another user on the same node.
+A script to quickly copy files to another user on the same node.
 
-The user you are transferring the file to should run the equivalent receive
+The user you are copying the file to should run the equivalent receive
  command, and you should tell them the ID and password for the transfer.
 
 Transfer passwords are single-use, so don't worry about giving them to
