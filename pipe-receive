@@ -150,6 +150,10 @@ while [[ "$result" == "incorrect password" ]]; do
     echo "$transfer_password" >"$transfer_fifo_dir/ctrl"
 
     result="$(cat "$transfer_fifo_dir/ctrl")"
+
+    if [[ "$result" == "incorrect password" ]]; then
+        msg warn "incorrect password"
+    fi
 done
 
 if [[ "$result" != "correct password" ]]; then
