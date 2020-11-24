@@ -223,8 +223,22 @@ fi
 # So by this point, we have a correct password, in theory.
 echo "correct password" >"$fifo_dir/ctrl"
 
+# Work out whether we have a working pv but if we don't, no worries.
+if command -v pv >/dev/null 2>/dev/null; then
+    PV=pv
+elif command -v /shared/ucl/apps/pv/1.6.6/bin/pv >/dev/null 2>/dev/null; then
+    PV=/shared/ucl/apps/pv/1.6.6/bin/pv
+else
+    PV="(none)"
+    msg warn "could not find pv -- transfer speed display will not be shown"
+fi
+
 msg info "correct password received, transferring files..."
 
-tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
+if [[ "$PV" == "(none)" ]]; then
+    tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
+else
+    tar -cv -- "$@" | "$PV" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
+fi
 
 msg info "transfer complete"

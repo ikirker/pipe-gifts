@@ -144,7 +144,6 @@ fi
 # Got ID, try password
 result="incorrect password"
 
-# TODO: Improve this logic
 while [[ "$result" == "incorrect password" ]]; do
     read -r -p "Please enter transfer password: " transfer_password
 
@@ -169,6 +168,20 @@ fi
 
 msg info "password correct, receiving files"
 
-tar -xvk <"$transfer_fifo_dir/data" || msg fatal "there was a problem transferring the files D:"
+# Work out whether we have a working pv but if we don't, no worries.
+if command -v pv >/dev/null 2>/dev/null; then
+    PV=pv
+elif command -v /shared/ucl/apps/pv/1.6.6/bin/pv >/dev/null 2>/dev/null; then
+    PV=/shared/ucl/apps/pv/1.6.6/bin/pv
+else
+    PV="(none)"
+    msg warn "could not find pv -- transfer speed display will not be shown"
+fi
 
-msg info "transfer complete\n"
+if [[ "$PV" == "(none)" ]]; then
+    tar -xvk <"$transfer_fifo_dir/data" || msg fatal "there was a problem transferring the files D:"
+else
+    pv <"$transfer_fifo_dir/data" | tar -xvk || msg fatal "there was a problem transferring the files D:"
+fi
+
+msg info "transfer complete"
