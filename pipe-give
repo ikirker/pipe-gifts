@@ -56,15 +56,78 @@ function must_have_cmds() {
     done
 }
 
-must_have_cmds tar mkfifo mktemp stat
+must_have_cmds tar mkfifo mktemp stat /usr/bin/getopt
 
+###########
 
+# Arg Parsing -- not a lot
 
-# TODO: improve
-if [[ "$#" -eq 0 ]] || [[ "$1" == "-h" ]]; then
-    echo "Usage: $0 [files]" >&2
-    exit 0
+help_message="
+usage: $0 [-h|-d] <file>...
+
+A script to quickly transfer files to another user on the same node.
+
+The user you are transferring the file to should run the equivalent receive
+ command, and you should tell them the ID and password for the transfer.
+
+Transfer passwords are single-use, so don't worry about giving them to
+ someone else.
+
+Flags:
+   -h, --help        Show this help.
+   -d, --debug       Debug mode.
+
+Args:
+   <file>...         One or more files to transfer.
+
+Examples:
+   $0 my_file        Set up a transfer for a file called \"my_file\".
+   $0 f_1 f_2        Set up a single transfer for two files, \"f_1\" and \"f_2\".
+
+   $0 my_dir         Set up a transfer for a directory called \"my_dir\".
+"
+
+function show_help_and_exit() {
+    printf "%s" "$help_message"
+    exit "${1:-0}"
+}
+
+canonical_args="$(
+/usr/bin/getopt \
+    -n pipe-give \
+    -l "help,debug" \
+    -o "hd" \
+    -- \
+    "$@"
+)"
+
+eval set -- "$canonical_args"
+
+# Defaults
+debug_mode="false"
+
+while true ; do
+    case "$1" in
+        -h|--help) show_help_and_exit; shift ;;
+        -d|--debug) debug_mode="true"; shift ;;
+        --) shift ; break ;;
+        *) msg fatal "invalid argument '$1'" ; exit 1 ;;
+    esac
+done
+
+if [[ $# -eq 0 ]]; then
+    show_help_and_exit 1
 fi
+
+if [[ "$debug_mode" == "true" ]]; then
+  # We don't have a proper debug mode, so just set the bash tracing options.
+  set -v -x
+fi
+
+##########
+
+# Okay, that's all the setup handled.
+
 
 # Allow use of alternative temporary directories, but...
 tmpdir="${TMPDIR:-/tmp}"

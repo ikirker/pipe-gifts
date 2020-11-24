@@ -53,11 +53,77 @@ function must_have_cmds() {
 must_have_cmds tar
 
 
-# TODO: improve
-if [[ "$#" -ne 0 ]]; then
-    echo "Usage: $0" >&2
-    exit 0
+###########
+
+# Arg Parsing -- not a lot
+
+help_message="
+usage: $0 [-h|-d] 
+
+A script to quickly receive files from another user on the same node.
+
+The user you are receiving the file from should run the equivalent give
+ command, and should tell you the ID and password for the transfer.
+
+This script will request the ID and password from you when you run it.
+
+Transfer passwords are single-use, so don't worry about sharing them
+ with someone else.
+
+Note that this will not overwrite files with the same name you already
+ have: if you have a file in the current directory called \"my_file\"
+ and someone gives you a file called \"my_file\", this will be treated
+ as an error.
+
+Flags:
+   -h, --help        Show this help.
+   -d, --debug       Debug mode.
+"
+
+
+function show_help_and_exit() {
+    printf "%s" "$help_message"
+    exit "${1:-0}"
+}
+
+canonical_args="$(
+/usr/bin/getopt \
+    -n pipe-receive \
+    -l "help,debug" \
+    -o "hd" \
+    -- \
+    "$@"
+)"
+
+eval set -- "$canonical_args"
+
+# Defaults
+debug_mode="false"
+
+while true ; do
+    case "$1" in
+        -h|--help) show_help_and_exit; shift ;;
+        -d|--debug) debug_mode="true"; shift ;;
+        --) shift ; break ;;
+        *) msg fatal "invalid argument '$1'" ; exit 1 ;;
+    esac
+done
+
+if [[ $# -eq 0 ]]; then
+    show_help_and_exit 1
 fi
+
+if [[ "$debug_mode" == "true" ]]; then
+  # We don't have a proper debug mode, so just set the bash tracing options.
+  set -v -x
+fi
+
+
+##########
+
+# Okay, that's all the setup handled.
+
+
 
 read -r -p "Please enter your transfer ID: " transfer_id 
 
