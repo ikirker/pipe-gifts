@@ -64,7 +64,7 @@ function must_have_cmds() {
     done
 }
 
-must_have_cmds tar mkfifo mktemp stat date /usr/bin/getopt
+must_have_cmds tar mkfifo mktemp stat date chmod /usr/bin/getopt
 
 ###########
 
@@ -155,6 +155,9 @@ fifo_suffix="${fifo_dir##*.}"
 
 # If we get interrupted or finish, remove the fifo directory
 trap cleanup_dir EXIT
+
+# Set proper public perms on fifo directory
+chmod a+rx "$fifo_dir"
 
 # Make one for password and info, one for transferring data.
 # It's like we're reinventing ftp woo
