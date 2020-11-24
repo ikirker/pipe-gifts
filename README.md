@@ -11,10 +11,10 @@ The users have to be logged into the same node at the same time, and since the p
 
 ## To Do:
 
- - better/any docs
  - optional encryption for data-stream (not sure how this would affect transfer rate)
  - better credential-handling mechanism (use `openssl enc` to encrypt known data with the password?)
  - checksums?
+ - option to specify ID and password on the receiving command-line?
 
 ## Potential Problems:
 
