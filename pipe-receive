@@ -26,7 +26,9 @@ function msg() {
         printf "[%s] %s: (%s) %s\n" "$(logdate)" "$0" "$level" "$message" >&2
     fi
     if [[ "$level" == "fatal" ]]; then
-        callstack
+        if [[ "${debug_mode:-false}" == "true" ]]; then
+          callstack
+        fi
     fi
 }
 
