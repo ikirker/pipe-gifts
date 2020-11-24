@@ -30,6 +30,10 @@ function msg() {
     fi
 }
 
+function logdate() {
+    date +"%F %T"
+}
+
 function callstack() {
     echo --- Trace: ---
     local i
