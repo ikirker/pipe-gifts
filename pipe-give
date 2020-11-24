@@ -27,7 +27,9 @@ function msg() {
     fi
     if [[ "$level" == "fatal" ]]; then
         if [[ "${debug_mode:-false}" == "true" ]]; then
-          callstack
+            callstack
+        else
+            exit 1
         fi
     fi
 }
