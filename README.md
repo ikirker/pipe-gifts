@@ -14,13 +14,11 @@ The users have to be logged into the same node at the same time, and since the p
  - better/any docs
  - optional encryption for data-stream (not sure how this would affect transfer rate)
  - better credential-handling mechanism (use `openssl enc` to encrypt known data with the password?)
- - think about safety -- make tar refuse to overwrite files?
- - tweak transfer output to be a little more explicative
  - checksums?
 
 ## Potential Problems:
 
- - not really secure
+ - not really secure, but maybe doesn't matter
  - no file integrity checks
 
 

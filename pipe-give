@@ -6,6 +6,8 @@ set -o errexit \
     -o pipefail \
     -o nounset
 
+global_msg_level=4
+
 function msg() {
     if [[ "$#" -ne 2 ]]; then
         printf "[%s] %s: (%s) %s" "$(logdate)" "$0" "fatal" "incorrect number of arguments provided to msg function"
@@ -47,6 +49,16 @@ function cleanup_dir() {
         rm -rf -- "${fifo_dir}"
     fi
 }
+
+function must_have_cmds() {
+    for cmd in "$@"; do
+        command -v "$cmd" >/dev/null 2>/dev/null || msg fatal "this script needs a working copy of '$cmd' but could not find one"
+    done
+}
+
+must_have_cmds tar mkfifo mktemp stat
+
+
 
 # TODO: improve
 if [[ "$#" -eq 0 ]] || [[ "$1" == "-h" ]]; then
@@ -94,6 +106,7 @@ Remember you must be on the same node.
 
 
 # TODO: use openssl to use password to encrypt sample data, to make this actually secure at all.
+# Hm. Since it's a one-time-use credential, I don't *think* it matters.
 
 # Allow several tries.
 allow_tries=3
@@ -115,6 +128,7 @@ while [[ "$tries" -lt "$allow_tries" ]]; do
 done
 
 if [[ "$correct_pass" == 0 ]]; then
+    echo "too many tries" >"$fifo_dir/ctrl"
     msg fatal "maximum number of password attempts exceeded, quitting."
     # Juuuuuust in case msg fatal doesn't exit, for some reason.
     exit 5
@@ -123,6 +137,8 @@ fi
 # So by this point, we have a correct password, in theory.
 echo "correct password" >"$fifo_dir/ctrl"
 
+msg info "correct password received, transferring files..."
+
 tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
 
-msg info "complete."
+msg info "transfer complete"
