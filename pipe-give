@@ -163,6 +163,9 @@ chmod a+rx "$fifo_dir"
 # It's like we're reinventing ftp woo
 mkfifo -- "$fifo_dir/ctrl" "$fifo_dir/data"
 
+# Both sides have to be able to use the ctrl fifo
+chmod a+w "$fifo_dir/ctrl"
+
 if [[ "${RANDOM:-}" == "" ]]; then
     msg fatal "bash random number generator has been broken, cannot continue"
 fi
