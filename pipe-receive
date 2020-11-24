@@ -102,16 +102,12 @@ debug_mode="false"
 
 while true ; do
     case "$1" in
-        -h|--help) show_help_and_exit; shift ;;
+        -h|--help) show_help_and_exit 0; shift ;;
         -d|--debug) debug_mode="true"; shift ;;
         --) shift ; break ;;
         *) msg fatal "invalid argument '$1'" ; exit 1 ;;
     esac
 done
-
-if [[ $# -eq 0 ]]; then
-    show_help_and_exit 1
-fi
 
 if [[ "$debug_mode" == "true" ]]; then
   # We don't have a proper debug mode, so just set the bash tracing options.
