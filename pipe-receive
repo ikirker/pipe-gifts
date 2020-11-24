@@ -54,7 +54,7 @@ function must_have_cmds() {
     done
 }
 
-must_have_cmds tar
+must_have_cmds tar date
 
 
 ###########
@@ -116,6 +116,9 @@ done
 if [[ "$debug_mode" == "true" ]]; then
   # We don't have a proper debug mode, so just set the bash tracing options.
   set -v -x
+else
+  # If not in debug mode, remove the callstack printer from the error handler.
+  trap ERR
 fi
 
 
