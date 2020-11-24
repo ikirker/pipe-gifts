@@ -181,7 +181,7 @@ fi
 if [[ "$PV" == "(none)" ]]; then
     tar -xvk <"$transfer_fifo_dir/data" || msg fatal "there was a problem transferring the files D:"
 else
-    pv <"$transfer_fifo_dir/data" | tar -xvk || msg fatal "there was a problem transferring the files D:"
+    "$PV" <"$transfer_fifo_dir/data" | tar -xvk || msg fatal "there was a problem transferring the files D:"
 fi
 
 msg info "transfer complete"
