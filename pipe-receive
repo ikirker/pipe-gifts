@@ -166,7 +166,7 @@ fi
 
 # So by this point we've either quit, or passed a correct password.
 
-msg info "password correct, receiving files"
+msg info "password correct, receiving files..."
 
 # Work out whether we have a working pv but if we don't, no worries.
 if command -v pv >/dev/null 2>/dev/null; then
