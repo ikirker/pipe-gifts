@@ -33,8 +33,6 @@ $ dd if=/dev/zero of=some_file bs=1GiB count=1
 
 $ pipe-give some_file
 
-$ pipe-give some_file
-
 Your transfer ID: XESXdZMT
     and password: 985126401
 
