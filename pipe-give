@@ -65,7 +65,7 @@ function must_have_cmds() {
     done
 }
 
-must_have_cmds tar mkfifo mktemp stat date chmod /usr/bin/getopt
+must_have_cmds tar mkfifo mktemp stat date chmod hostname /usr/bin/getopt
 
 ###########
 
@@ -171,6 +171,9 @@ if [[ "${RANDOM:-}" == "" ]]; then
     msg fatal "bash random number generator has been broken, cannot continue"
 fi
 
+# Get the hostname to let people know what node they're on.
+this_hostname="$(hostname -s)"
+
 # Make a password to *kind* of authenticate transfers.
 transfer_pass="$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM"
 transfer_pass="${transfer_pass:1:9}"
@@ -182,8 +185,10 @@ Please enter this at receiver.
 
 Remember you must be on the same node.
 
+This node is: %s
+
     [Ctrl-C to cancel.]
-" "$fifo_suffix" "$transfer_pass"
+" "$fifo_suffix" "$transfer_pass" "$this_hostname"
 
 
 # TODO: use openssl to use password to encrypt sample data, to make this actually secure at all.

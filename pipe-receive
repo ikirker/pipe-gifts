@@ -59,7 +59,7 @@ function must_have_cmds() {
     done
 }
 
-must_have_cmds tar date
+must_have_cmds tar date hostname
 
 
 ###########
@@ -138,7 +138,8 @@ read -r -p "Please enter your transfer ID: " transfer_id
 transfer_fifo_dir="${TMPDIR:-/tmp}/pipe-transfer.$transfer_id"
 
 if [[ ! -d "$transfer_fifo_dir" ]]; then
-    msg fatal "could not find a transfer with that id"
+    this_hostname="$(hostname -s)"
+    msg fatal "could not find a transfer with that id -- check sender node is $this_hostname"
 fi
 
 # Got ID, try password
