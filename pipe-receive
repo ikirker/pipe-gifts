@@ -178,10 +178,20 @@ else
     msg warn "could not find pv -- transfer speed display will not be shown"
 fi
 
+# Run the actual transfer, piping to tar from the data fifo.
+transfer_status=problem
 if [[ "$PV" == "(none)" ]]; then
-    tar -xvk <"$transfer_fifo_dir/data" || msg fatal "there was a problem transferring the files D:"
+    tar -xvk <"$transfer_fifo_dir/data" && transfer_status=success
 else
-    "$PV" <"$transfer_fifo_dir/data" | tar -xvk || msg fatal "there was a problem transferring the files D:"
+    "$PV" <"$transfer_fifo_dir/data" | tar -xvk && transfer_status=success
 fi
 
-msg info "transfer complete"
+# Report back so the sender can tell whether there was a problem.
+if [[ "$transfer_status" == "problem" ]]; then
+    echo "problem" > "$transfer_fifo_dir/ctrl"
+    msg fatal "there was a problem transferring the files D:"
+else
+    echo "success" > "$transfer_fifo_dir/ctrl"
+    msg info "transfer complete"
+fi
+

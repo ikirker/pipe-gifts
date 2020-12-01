@@ -235,6 +235,7 @@ fi
 
 msg info "correct password received, transferring files..."
 
+# Run the actual transfer, piping tar to the data fifo.
 if [[ "$PV" == "(none)" ]]; then
     tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
 else
@@ -242,3 +243,10 @@ else
 fi
 
 msg info "transfer complete"
+
+# See if the receiver reported success, so we know whether can, e.g. delete the original files.
+acknowledgement="$(cat -- "$fifo_dir/ctrl")"
+if [[ "$acknowledgement" == "problem" ]]; then
+    msg warn "the receiver reported a problem, files may not have transferred successfully"
+fi
+
