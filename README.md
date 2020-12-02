@@ -9,10 +9,6 @@ Behind the scenes, it creates a pair of named pipes in a public temporary direct
 
 The users have to be logged into the same node at the same time, and since the pipes depend on streaming it's all synchronous in terms of presence, but there's no stored state.
 
-## To Do:
-
- - file listings pre-transfer 
-
 ## Maybe To Do:
 
  - optional encryption for data-stream (not sure how this would affect transfer rate)
@@ -26,50 +22,76 @@ The users have to be logged into the same node at the same time, and since the p
  - not really secure, but maybe doesn't matter
  - no file integrity checks
 
+## Speed
+
+In quick testing, I managed about 250MiB/s from Lustre to Lustre, and about 1GiB/s from tmpfs to tmpfs. It's not ideal, but it's fast enough for a lot of uses.
 
 ## Example
 
-Sender:
+##### Sender
+
+The Sender makes a test file to send to their friend:
 
 ```
 # Make a junk 1GiB file
 $ dd if=/dev/zero of=some_file bs=1GiB count=1
+```
 
+And then uses `pipe-give` to send it:
+
+```
 $ pipe-give some_file
 
-Your transfer ID: XESXdZMT
-    and password: 985126401
+Your transfer ID: dzbGPpE3
+    and password: 688815576
 
 Please enter this at receiver.
 
 Remember you must be on the same node.
 
+This node is: login13
+
     [Ctrl-C to cancel.]
 ```
 
-Sender now gives ID and password to receiver, who enters them at the prompts:
+The Sender gives the ID and password to Receiver...
+
+##### Receiver
+
+... who then runs the `pipe-receive` and enters them in, and presses `y` to confirm that the list of files is okay:
 
 ```
 $ pipe-receive
-Please enter your transfer ID: XESXdZMT
-Please enter transfer password: 985126401
-```
+Please enter your transfer ID: dzbGPpE3
+Please enter transfer password: 688815576
+[2020-12-02 15:06:44] pipe-receive: (info) password correct, receiving identity and file count
+[2020-12-02 15:06:44] pipe-receive: (info) receiving list of files for approval
 
-And then the copy starts, the sender sees:
-
-```
-[2020-11-25 00:59:53] pipe-give: (info) correct password received, transferring files...
+-- File List --
 some_file
-1.00GiB 0:00:01 [ 977MiB/s] [         <=>                                              ]
-[2020-11-25 00:59:54] pipe-give: (info) transfer complete
-```
+---------------
 
-The receiver sees:
-
-```
-[2020-11-25 00:59:53] pipe-receive: (info) password correct, receiving files...
+User coursb4 wants to copy this file to you.
+Would you like to accept? [press y for yes, anything else to cancel]
+[2020-12-02 15:06:55] pipe-receive: (info) confirming with sender
+[2020-12-02 15:06:55] pipe-receive: (info) receiving files...
 some_file
-1.00GiB 0:00:01 [ 977MiB/s] [         <=>                                              ]
-[2020-11-25 00:59:54] pipe-receive: (info) transfer complete
+1.00GiB 0:00:04 [ 234MiB/s] [                        <=>                                                                                                                                                                                                                                ]
+[2020-12-02 15:06:59] pipe-receive: (info) transfer complete
+```
+
+##### Sender
+
+The Sender sees their file has been transferred:
+
+```
+[2020-12-02 15:06:44] pipe-give: (info) received correct password
+[2020-12-02 15:06:44] pipe-give: (info) sending identity and number of files
+[2020-12-02 15:06:44] pipe-give: (info) sending file listing to receiver for approval
+[2020-12-02 15:06:55] pipe-give: (info) confirmation received
+[2020-12-02 15:06:55] pipe-give: (info) transferring files...
+some_file
+1.00GiB 0:00:04 [ 234MiB/s] [                        <=>                                                                                                                                                                                                                                ]
+[2020-12-02 15:06:59] pipe-give: (info) transfer complete
 ```
 
