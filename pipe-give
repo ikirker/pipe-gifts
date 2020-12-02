@@ -266,9 +266,9 @@ msg info "transferring files..."
 
 # Run the actual transfer, piping tar to the data fifo.
 if [[ "$PV" == "(none)" ]]; then
-    tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
+    tar -cv -- "$@" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files"
 else
-    tar -cv -- "$@" | "$PV" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files D:"
+    tar -cv -- "$@" | "$PV" >"$fifo_dir/data" || msg fatal "there was a problem while transferring the files"
 fi
 
 msg info "transfer complete"

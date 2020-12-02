@@ -233,7 +233,7 @@ fi
 # Report back so the sender can tell whether there was a problem.
 if [[ "$transfer_status" == "problem" ]]; then
     echo "problem" > "$transfer_fifo_dir/ctrl"
-    msg fatal "there was a problem transferring the files D:"
+    msg fatal "there was a problem transferring the files"
 else
     echo "success" > "$transfer_fifo_dir/ctrl"
     msg info "transfer complete"
