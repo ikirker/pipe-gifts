@@ -87,6 +87,7 @@ Note that this will not overwrite files with the same name you already
 Flags:
    -h, --help        Show this help.
    -d, --debug       Debug mode.
+   -s, --skip        Skip the file listing and confirmation prompt.
 "
 
 
@@ -98,8 +99,8 @@ function show_help_and_exit() {
 canonical_args="$(
 /usr/bin/getopt \
     -n pipe-receive \
-    -l "help,debug" \
-    -o "hd" \
+    -l "help,debug,skip" \
+    -o "hds" \
     -- \
     "$@"
 )"
@@ -108,11 +109,13 @@ eval set -- "$canonical_args"
 
 # Defaults
 debug_mode="false"
+skip_confirmation="false"
 
 while true ; do
     case "$1" in
         -h|--help) show_help_and_exit 0; shift ;;
         -d|--debug) debug_mode="true"; shift ;;
+        -s|--skip) skip_confirmation="true"; shift ;;
         --) shift ; break ;;
         *) msg fatal "invalid argument '$1'" ; exit 1 ;;
     esac
@@ -167,7 +170,39 @@ fi
 
 # So by this point we've either quit, or passed a correct password.
 
-msg info "password correct, receiving files..."
+msg info "password correct, receiving identity and file count"
+sending_user="$(cat -- "$transfer_fifo_dir/ctrl")"
+file_count="$(cat -- "$transfer_fifo_dir/ctrl")"
+
+if [[ "$sending_user" =~ ^sending\ user:[a-z0-9_-][a-z0-9_-]* ]]; then
+    sending_user="${sending_user#sending user:}"
+else
+    msg fatal "invalid message received while trying to get sender identity"
+fi
+
+if [[ "$file_count" =~ ^sending\ file\ count:[0-9][0-9]* ]]; then
+    file_count="${file_count#sending file count:}"
+else
+    msg fatal "invalid message received while trying to get file count"
+fi
+
+
+msg info "receiving list of files for approval"
+file_list="$(cat -- "$transfer_fifo_dir/data")"
+if [[ "$skip_confirmation" == "true" ]]; then
+    printf "List:\n%s\n" "$file_list"
+    printf "User %s wants to copy these %s files to you." "$sending_user" "$file_count"
+    read -r -n 1 -p "Would you like to accept? [press y for yes, anything else to cancel]" confirm_option
+else
+    confirm_option="y"
+fi
+
+if [[ "$confirm_option" == "y" ]]; then
+    echo "confirm" >"$transfer_fifo_dir/ctrl"
+else
+    echo "reject" >"$transfer_fifo_dir/ctrl"
+    msg fatal "rejected listing, will quit"
+fi
 
 # Work out whether we have a working pv but if we don't, no worries.
 if command -v pv >/dev/null 2>/dev/null; then

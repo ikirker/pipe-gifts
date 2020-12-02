@@ -65,7 +65,7 @@ function must_have_cmds() {
     done
 }
 
-must_have_cmds tar mkfifo mktemp stat date chmod hostname /usr/bin/getopt
+must_have_cmds tar mkfifo mktemp stat date chmod hostname sed /usr/bin/getopt
 
 ###########
 
@@ -227,6 +227,27 @@ fi
 
 # So by this point, we have a correct password, in theory.
 echo "correct password" >"$fifo_dir/ctrl"
+
+# It occurs to me that without actually saying, nowhere in this process
+#  have we told the receiver who the sender is
+msg info "sending identity and number of files" 
+echo "sending user:$(whoami)" >"$fifo_dir/ctrl"
+echo "sending file count:$#" >"$fifo_dir/ctrl"
+
+# Send the list of files for receiver approval
+msg info "sending file listing to receiver for approval"
+# tar does a bunch of safety transformations to the filenames,
+#  we replicate them so the receiver can see what will be received
+# - take off every path component up to a ../ or ./
+# - take off any leading /
+printf "%s\n" "$@" | sed -e 's_^.*/\.\./_/_' -e 's_^\.\./_/_' -e 's_^/__' >"$fifo_dir/data"
+
+confirmation="$(cat -- "$fifo_dir/ctrl")"
+if [[ "$confirmation" == "reject" ]]; then
+    msg fatal "the transfer was rejected by the receiver"
+elif [[ "$confirmation" != "confirm" ]]; then
+    msg fatal "invalid message was received while confirming listing"
+fi
 
 # Work out whether we have a working pv but if we don't, no worries.
 if command -v pv >/dev/null 2>/dev/null; then
