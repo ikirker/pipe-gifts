@@ -227,6 +227,7 @@ fi
 
 # So by this point, we have a correct password, in theory.
 echo "correct password" >"$fifo_dir/ctrl"
+msg info "received correct password"
 
 # It occurs to me that without actually saying, nowhere in this process
 #  have we told the receiver who the sender is
@@ -247,6 +248,8 @@ if [[ "$confirmation" == "reject" ]]; then
     msg fatal "the transfer was rejected by the receiver"
 elif [[ "$confirmation" != "confirm" ]]; then
     msg fatal "invalid message was received while confirming listing"
+else
+    msg info "confirmation received"
 fi
 
 # Work out whether we have a working pv but if we don't, no worries.
@@ -259,7 +262,7 @@ else
     msg warn "could not find pv -- transfer speed display will not be shown"
 fi
 
-msg info "correct password received, transferring files..."
+msg info "transferring files..."
 
 # Run the actual transfer, piping tar to the data fifo.
 if [[ "$PV" == "(none)" ]]; then
