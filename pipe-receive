@@ -190,12 +190,12 @@ fi
 msg info "receiving list of files for approval"
 file_list="$(cat -- "$transfer_fifo_dir/data")"
 if [[ "$skip_confirmation" == "true" ]]; then
+    msg info "skipping approval"
+    confirm_option="y"
+else
     printf "List:\n%s\n" "$file_list"
     printf "User %s wants to copy these %s files to you." "$sending_user" "$file_count"
     read -r -N 1 -p "Would you like to accept? [press y for yes, anything else to cancel]" confirm_option
-else
-    msg info "skipping approval"
-    confirm_option="y"
 fi
 
 if [[ "$confirm_option" == "y" ]]; then
