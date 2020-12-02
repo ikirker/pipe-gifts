@@ -199,7 +199,7 @@ else
     else
         printf "User %s wants to copy these %s files to you.\n" "$sending_user" "$file_count"
     fi
-    read -r -N 1 -p "Would you like to accept? [press y for yes, anything else to cancel]" confirm_option
+    read -s -r -N 1 -p "Would you like to accept? [press y for yes, anything else to cancel]" confirm_option
     printf "\n"
 fi
 
