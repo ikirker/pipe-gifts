@@ -233,6 +233,7 @@ msg info "received correct password"
 #  have we told the receiver who the sender is
 msg info "sending identity and number of files" 
 echo "sending user:$(whoami)" >"$fifo_dir/ctrl"
+sleep 1 # this sleep attempts to avoid message merging on the receiving end, which causes hangs
 echo "sending file count:$#" >"$fifo_dir/ctrl"
 
 # Send the list of files for receiver approval
