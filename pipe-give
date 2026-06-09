@@ -232,8 +232,14 @@ msg info "received correct password"
 # It occurs to me that without actually saying, nowhere in this process
 #  have we told the receiver who the sender is
 msg info "sending identity and number of files" 
-echo "sending user:$(whoami)" >"$fifo_dir/ctrl"
-echo "sending file count:$#" >"$fifo_dir/ctrl"
+printf \
+    "sending user: %s\nsending file count:%d\n" \
+    "$(whoami)" \
+    "$#" \
+    >"$fifo_dir/ctrl"
+
+# (the number of files isn't used for the transfer, it's just to show the receiving user)
+
 
 # Send the list of files for receiver approval
 msg info "sending file listing to receiver for approval"
