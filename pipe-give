@@ -233,7 +233,7 @@ msg info "received correct password"
 #  have we told the receiver who the sender is
 msg info "sending identity and number of files" 
 printf \
-    "sending user: %s\nsending file count:%d\n" \
+    "sending user:%s\nsending file count:%d\n" \
     "$(whoami)" \
     "$#" \
     >"$fifo_dir/ctrl"
